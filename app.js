@@ -1,6 +1,37 @@
-const axios = require('axios');
-const fs = require('fs');
-const XLSX = require('xlsx');
+import axios from 'axios';
+import XLSX from 'xlsx';
+import { sequelize } from './models/sequelize.js';
+import {  createNewDrug, findALLDrugs } from './models/drugs.js'   
+
+const main = async () => {
+  const models = {
+      list:  [
+          'drugs'
+      ]
+  };
+  // DB
+  const configTables = models.list;
+  const dbInterface = sequelize.getQueryInterface();
+  try {
+    const checks = await Promise.all(configTables.map(configTable => {
+        return dbInterface.tableExists(configTable);
+    }));
+    const result = checks.every(el => el === true);
+    if (!result) {
+        // eslint-disable-next-line no-console
+        console.error(`🚩 Failed to check DB tables`);
+        throw (`Some DB tables are missing`);
+    }
+  } catch (error) {
+    console.error(`🚩 egfrsgs ${error}` );
+
+  }
+  
+
+}; 
+
+main();
+
 
 let csvData = [[
   'id',
@@ -116,13 +147,21 @@ async function run() {
 const generateNumbers = async () => {
   try {
     let numbers = [];
-    for (let i = 70000; i <= 75000; i++) {  //52000
+    for (let i = 6; i <= 60000; i++) {  //52000
       numbers.push(i);
       if (numbers.length >= 11) {
         console.log(numbers.join(","));
         const xml = await getXMLPrice(28, numbers.join(","));
 
         xml.forEach((item) => {
+          createNewDrug({
+            drug_name: item.name,
+            drug_inits: item.name.slice(0, 3)
+      
+          })
+          
+          
+          /*
             csvData.push([
               '0',
               item.id,
@@ -136,6 +175,8 @@ const generateNumbers = async () => {
               item.canBeOrdered,
               new Date(),
             ]);
+
+            */
         });
 
         numbers = [];
