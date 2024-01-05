@@ -108,7 +108,7 @@ export const runANC = async () => {
           logger.error(`ANC parder error: ${error}`)
         }
         numbers = [];
-       // await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
   }
