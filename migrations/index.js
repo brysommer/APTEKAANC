@@ -1,5 +1,7 @@
 import { Drugs, createNewDrug } from '../models/drugs.js';
 import { ZnaharNames, createNewZnahar } from '../models/ZnaharNames.js';
+import {createNewAncName, findAllAncNames, ANCnames} from '../models/ancNomenclatura.js';
+import { ZnaharPrices } from '../models/priceZnahar.js';
 
 const DEBUG = true;
 
@@ -7,7 +9,9 @@ const main = async () => {
     try {
         const syncState = await Promise.all([
             Drugs.sync(),
-            ZnaharNames.sync()
+            ZnaharNames.sync(),
+            ANCnames.sync(),
+            ZnaharPrices.sync()
         ]);
         
         

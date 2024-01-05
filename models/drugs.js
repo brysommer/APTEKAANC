@@ -4,18 +4,41 @@ import { sequelize } from './sequelize.js';
 
 class Drugs extends Model {}
 Drugs.init({
-    drug_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    drug_inits: {
+    drug_id: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: false
-    }
-    
-
+    },
+    drug_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    drug_producer: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    pharmacy_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    pharmacy_region: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    price: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
+    availability_status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: false
+    },
 }, {
     freezeTableName: false,
     timestamps: true,
@@ -34,29 +57,21 @@ const createNewDrug = async (drugData) => {
     return res;
 };
 
-/*
-const updateDrugByChatId = async (chat_id, updateParams) => {
-    const res = await User.update({ ...updateParams } , { where: { chat_id } });
+
+const updateDrugById = async (id, price) => {
+    const res = await Drugs.update({ price } , { where: { id } });
     if (res[0]) {
-        const data = await findUserByChatId(chat_id);
-        if (data) {
-            logger.info(`User ${data.chat_id} updated`);
-            return data;
-        }
-        logger.info(`User ${chat_id} updated, but can't read result data`);
+        return res[0];
     } 
     return undefined;
 };
-*/
 
-
-
-
-const findDrugByName = async (id) => {
-    const res = await User.findAll({ where: { id: id } });
-    if (res.length > 0) return res.map(el => el.dataValues);
+const findAncPriceByDrugPharmacy = async (drug_id, pharmacy_region) => {
+    const res = await Drugs.findOne({ where: { drug_id, pharmacy_region }});
+    if (res) return res.dataValues;
     return;
-};
+}
+
 
 const findALLDrugs = async () => {
     const res = await Drugs.findAll({ where: {  } });
@@ -67,6 +82,7 @@ const findALLDrugs = async () => {
 export {
     Drugs,
     createNewDrug,
-    findDrugByName,
     findALLDrugs,
+    updateDrugById,
+    findAncPriceByDrugPharmacy
 };   

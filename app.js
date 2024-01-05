@@ -1,7 +1,12 @@
-import axios from 'axios';
 import XLSX from 'xlsx';
 import { sequelize } from './models/sequelize.js';
-import {  createNewDrug, findALLDrugs } from './models/drugs.js'   
+import { findALLDrugs } from './models/drugs.js';
+import { runANC } from './ancData.js';
+import { findALLZnaharPrices } from './models/priceZnahar.js';
+import { runZnahar } from './znaharData.js';
+import { logger } from './logger/index.js';
+
+const sharedFolderPath = '../price/SynologyDrive/';
 
 const main = async () => {
   const models = {
@@ -33,162 +38,164 @@ const main = async () => {
 main();
 
 
-let csvData = [[
-  'id',
-  'drug_id',
-  'drug_name',
-  'drug_producer',
-  'pharmacy_id',
-  'pharmacy_name',
-  'pharmacy_region',
-  'pharmacy_address',
-  'price',
-  'availability_status',
-  'created_at',
-]];
 
 
-
-const znaharDB = [
-  {
-    id: 28,
-    city: 'Львів'
-  },
-  {
-    id: 114,
-    city: 'Івано-Франківськ'
-  },
-  {
-    id: 11602,
-    city: 'Трускавець'
-  },
-  {
-    id: 27249,
-    city: 'Моршин'
-  },
-  {
-    id: 10359,
-    city: 'Стебник'
-  },
-  {
-    id: 116,
-    city: 'Дрогобич'
-  },
-  {
-    id: 108,
-    city: 'Коломия'
-  },
-  {
-    id: 27077,
-    city: 'Долина'
-  },
-  {
-    id: 26953,
-    city: 'Болехів'
-  },
-  {
-    id: 24042,
-    city: 'Брошнів'
-  },
-  {
-    id: 27028,
-    city: 'Галич'
-  },
-  {
-    id: 99,
-    city: 'Ужгород'
-  },
-]
-
-
-function findCategoryById(categories, id) {
-  for (const category of categories) {
-    if (category.$ && category.$.id === id) {
-      return category._;
+const writeArrayToXLS = (arrayData, xlsFilePath) => {
+  try {
+    const maxRowsPerSheet = 50000;
+    const sheets = [];
+    let count = 1;
+    
+    for(let i = 0; i < arrayData.length; i += maxRowsPerSheet) {
+      const chunk = arrayData.slice(i, i + maxRowsPerSheet);
+      const sheetName = `PART_${count++}`; 
+      
+      const worksheet = XLSX.utils.aoa_to_sheet(chunk);
+      sheets.push({name: sheetName, worksheet});
     }
-  }
-  return null;
-}
-
-const getXMLPrice = async(city, products) => {
-  try {
-    const response = await axios.get(`https://anc.ua/productbrowser/v2/ua/products?city=${city}&products=${products}`);
-    return response.data;
-  } catch (error) {
-    console.error('Помилка при отриманні XML: ', error);
-    throw error;
-  }
-}
-
-
-function writeArrayToXLS(arrayData, xlsFilePath) {
-  try {
+    
     const workbook = XLSX.utils.book_new();
-    const sheetName = 'Sheet1';
-    const worksheet = XLSX.utils.aoa_to_sheet(arrayData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    XLSX.writeFile(workbook, xlsFilePath);
+    
+    sheets.forEach(sheet => {
+      XLSX.utils.book_append_sheet(workbook, sheet.worksheet, sheet.name); 
+    });
+    
+    XLSX.writeFile(workbook, sharedFolderPath + xlsFilePath);
+    console.log(sheets.length, arrayData.length, xlsFilePath)
+    
+    logger.info(`Записано ${sheets.length} частин, ${arrayData.length} элементів в ${xlsFilePath.slice(0, 9)}`);
     console.log('Масив успішно записано в XLS.');
   } catch (error) {
+    logger.warn(`Масив: ${arrayData.length} Шлях: ${xlsFilePath} Помилка під час запису масиву в XLS:`, error)
     console.error('Помилка під час запису масиву в XLS:', error);
   }
 }
 
 async function run() {
+  
   try {
-    const xmlData = await getXMLPrice();
-    const dataArray = await convertXMLToCSV(xmlData)
-    writeArrayToXLS(dataArray, 'price.xls');
+    await runANC();
+    let csvData = [[
+      'id',
+      'drug_id',
+      'drug_name',
+      'drug_producer',
+      'pharmacy_id',
+      'pharmacy_name',
+      'pharmacy_region',
+      'pharmacy_address',
+      'price',
+      'availability_status',
+      'updated_at',
+    ]];    
+    const dataArray = await findALLDrugs();
+    for (const el of dataArray) {
+      csvData.push([
+        el.id,
+        el.drug_id,
+        el.drug_name,
+        el.drug_producer,
+        'ID',
+        el.pharmacy_name,
+        el.pharmacy_region,
+        'addres',
+        el.price,
+        el.availability_status,
+        el.updatedAt
+      ])
+    }
+    const date = new Date();
+    const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
+    writeArrayToXLS(csvData, `priceANC${filename}.xls`);
   } catch (error) {
-    console.error('Помилка: ', error);
+    console.error('Помилка ANC: ', error);
   }
-}
 
-const generateNumbers = async () => {
+
   try {
+    await runZnahar();
+    let csvDataZnahar = [[
+      'id',
+      'drug_id',
+      'drug_name',
+      'drug_producer',
+      'pharmacy_id',
+      'pharmacy_name',
+      'pharmacy_region',
+      'pharmacy_address',
+      'price',
+      'availability_status',
+      'znahar_id',
+      'updated_at',
+    ]];    
+    const dataArrayZnahar = await findALLZnaharPrices();
+    for (const el of dataArrayZnahar) {
+      csvDataZnahar.push([
+        el.id,
+        el.drug_id,
+        el.drug_name,
+        el.drug_producer,
+        el.pharmacy_id,
+        el.pharmacy_name,
+        el.pharmacy_region,
+        el.pharmacy_address,
+        el.price,
+        el.availability_status,
+        el.drug_name,
+        el.updatedAt
+      ])
+    }
+    const date = new Date();
+    const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
+    console.log(`Довжина знахар:${csvDataZnahar.length}`);
+    writeArrayToXLS(csvDataZnahar, `priceZnahar${filename}.xls`);
+  } catch (error) {
+    console.error('Помилка Znahar: ', error);
+  }
+  run();
+};
+
+run();
+
+
+
+/*
+const generateNumbers = async () => {
+  const ancNames = await findAllAncNames();
+  for (const city of ancDB) {
     let numbers = [];
-    for (let i = 6; i <= 60000; i++) {  //52000
+    //for (const name of ancNames) {
+    for (let i = 6; i <= 30; i++) {  //52000
       numbers.push(i);
       if (numbers.length >= 11) {
+
         console.log(numbers.join(","));
-        const xml = await getXMLPrice(28, numbers.join(","));
+        
+        const xml = await getXMLPrice(city.id, numbers.join(","));
 
         xml.forEach((item) => {
+          if (item.price == 0) return;
           createNewDrug({
+            drug_id: item.id,
             drug_name: item.name,
-            drug_inits: item.name.slice(0, 3)
-      
+            drug_producer: item.producer.name,
+            pharmacy_name: 'ANC',
+            pharmacy_region: city.city,
+            price: item.price,
+            availability_status: 'Забронювати',   
           })
-          
-          
-          /*
-            csvData.push([
-              '0',
-              item.id,
-              item.name,
-              item.producer.name,
-              'pharmacy_id',
-              'ANC',
-              'Львів',
-              'pharmacy_address',
-              item.price,
-              item.canBeOrdered,
-              new Date(),
-            ]);
-
-            */
         });
-
         numbers = [];
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-    writeArrayToXLS(csvData, 'ANC.xls');
-  
-  } catch (error) {
-    console.error('Помилка: ', error);
+
+
   }
+  
+  
 }
 
 generateNumbers();
-
+*/
 

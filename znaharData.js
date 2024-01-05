@@ -1,6 +1,8 @@
 import axios from 'axios';
 import XLSX from 'xlsx';
 import { findALLZnaharNames } from './models/ZnaharNames.js';
+import { createNewZnaharPrice, findZnaharPriceByDrugPharmacy, updateZnaharPrice } from './models/priceZnahar.js';
+import { logger } from './logger/index.js';
 
 const znaharDB = [
     {
@@ -135,46 +137,7 @@ function findElementByWarehouseId(array, warehouseId) {
   }
 }
 
-let csvData = [[
-    'id',
-    'drug_id',
-    'drug_name',
-    'drug_producer',
-    'pharmacy_id',
-    'pharmacy_name',
-    'pharmacy_region',
-    'pharmacy_address',
-    'price',
-    'availability_status',
-    'created_at',
-    'znaharId',
-]];
 
-
-function convertArrayToSheet(APIdata) {
-
-
-  APIdata.forEach((item) => {
-      item.forEach((item) => {
-        csvData.push([
-          '0',
-          'невідомо',
-          item.name,
-          item.producer,
-          item.warehouse_id,
-          'Аптека Знахар',
-          findElementByWarehouseId(znaharDB, item.warehouse_id).city,
-          findElementByWarehouseId(znaharDB, item.warehouse_id).name,
-          item.price,
-          'Забронювати',
-          new Date(),
-          item.name,
-        ]
-        );
-      })
-  });
-  return csvData;
-}
 
 
 
@@ -191,62 +154,54 @@ function writeArrayToXLS(arrayData, xlsFilePath) {
   }
 }
 
-async function run() {
+export async function runZnahar() {
   try {
     const apiData = await findALLZnaharNames();
 
-    const pricesData = [];
+    for (let i = 0; i < apiData.length; i++) {
+        if (i % 1000 === 0) {
+          logger.info(`Знахар обробляє елемент #${i}`)
+        }
 
-    
-
-
-    for (let i = 6000; i < apiData.length; i++) {
-        console.log(i)
         const el = apiData[i];
         try {
             const results = await getApiData(
               `offset=0&limit=50&filter_name=${el.drug_name}&warehouses[]=1&warehouses[]=2&warehouses[]=3&warehouses[]=4&warehouses[]=5&warehouses[]=6&warehouses[]=7&warehouses[]=8&warehouses[]=9&warehouses[]=10&warehouses[]=11&warehouses[]=12&warehouses[]=13&warehouses[]=14&warehouses[]=15`
             );
-            results.map((item) => {
+            results.map(async (item) => {
               item.id = el.id;
               return item;
             });
-            pricesData.push(results);
+            for (const el of results) {
+              const element = await findZnaharPriceByDrugPharmacy(el.id, el.warehouse_id);
+              if (element) {
+                await updateZnaharPrice(element.id, el.price);
+              } else {
+                await createNewZnaharPrice({
+                  drug_id: el.id,
+                  drug_name: el.name,
+                  drug_producer: el.producer,
+                  pharmacy_id: el.warehouse_id,
+                  pharmacy_name: 'Аптека Знахар',
+                  pharmacy_region: findElementByWarehouseId(znaharDB, el.warehouse_id).city,
+                  pharmacy_address: findElementByWarehouseId(znaharDB, el.warehouse_id).name,
+                  price: el.price,
+                  availability_status: 'Забронювати',
+                  znaharId: el.name
+                })  
+              }
+            }
+
           } catch (error) {
+            logger.warn('Помилка Знахара при обробці елемента', i, error)
             console.error('Помилка при обробці елемента', i, error);
           }
-        }
-  
-    //await new Promise(resolve => setTimeout(resolve, 10000));
+     //   await new Promise(resolve => setTimeout(resolve, 500));
+      }
 
-    let iNumber = 60951;
-
-    pricesData.forEach((item) => {
-        item.forEach((item) => {
-          csvData.push([
-            iNumber,
-            item.id,
-            item.name,
-            item.producer,
-            item.warehouse_id,
-            'Аптека Знахар',
-            findElementByWarehouseId(znaharDB, item.warehouse_id).city,
-            findElementByWarehouseId(znaharDB, item.warehouse_id).name,
-            item.price,
-            'Забронювати',
-            new Date(),
-            item.name,
-          ]);
-        iNumber++;
-        })
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 60000));
-
-    writeArrayToXLS(csvData, 'Znahar.xls');
   } catch (error) {
     console.error('Помилка: ', error);
   }
 }
 
-run();
+//run();

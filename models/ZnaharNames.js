@@ -30,29 +30,6 @@ const createNewZnahar = async (drugData) => {
     return res;
 };
 
-/*
-const updateDrugByChatId = async (chat_id, updateParams) => {
-    const res = await User.update({ ...updateParams } , { where: { chat_id } });
-    if (res[0]) {
-        const data = await findUserByChatId(chat_id);
-        if (data) {
-            logger.info(`User ${data.chat_id} updated`);
-            return data;
-        }
-        logger.info(`User ${chat_id} updated, but can't read result data`);
-    } 
-    return undefined;
-};
-*/
-
-
-
-
-const findDrugByName = async (id) => {
-    const res = await User.findAll({ where: { id: id } });
-    if (res.length > 0) return res.map(el => el.dataValues);
-    return;
-};
 
 const findALLZnaharNames = async () => {
     const res = await ZnaharNames.findAll({ where: {  } });
