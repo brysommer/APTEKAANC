@@ -88,7 +88,7 @@ async function run() {
       'availability_status',
       'updated_at',
     ]];    
-    const dataArray = await findALLDrugs();
+    let dataArray = await findALLDrugs();
     for (const el of dataArray) {
       csvData.push([
         el.id,
@@ -107,6 +107,8 @@ async function run() {
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     writeArrayToXLS(csvData, `priceANC${filename}.xls`);
+    await new Promise(resolve => setTimeout(resolve, 300000));
+    dataArray = []
   } catch (error) {
     console.error('Помилка ANC: ', error);
   }
@@ -149,6 +151,8 @@ async function run() {
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     console.log(`Довжина знахар:${csvDataZnahar.length}`);
     writeArrayToXLS(csvDataZnahar, `priceZnahar${filename}.xls`);
+    await new Promise(resolve => setTimeout(resolve, 300000));
+    csvDataZnahar = [];
   } catch (error) {
     console.error('Помилка Znahar: ', error);
   }
