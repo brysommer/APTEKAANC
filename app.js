@@ -39,7 +39,7 @@ main();
 
 
 
-
+/*
 const writeArrayToXLS = (arrayData, xlsFilePath) => {
   try {
     const maxRowsPerSheet = 50000;
@@ -70,11 +70,24 @@ const writeArrayToXLS = (arrayData, xlsFilePath) => {
     console.error('Помилка під час запису масиву в XLS:', error);
   }
 }
+*/
+const writeArrayToXLSX = (arrayData, xlsxFilePath) => {
 
+  const worksheet = XLSX.utils.aoa_to_sheet(arrayData);
+  
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+  XLSX.writeFile(workbook, xlsxFilePath);
+
+  logger.info(`Записано ${arrayData.length} элементів в ${xlsxFilePath}`);
+  
+  console.log("Масив записано в XLSX");
+}
 async function run() {
   
   try {
-    await runANC();
+    //await runANC();
     let csvData = [[
       'id',
       'drug_id',
@@ -106,7 +119,7 @@ async function run() {
     }
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
-    writeArrayToXLS(csvData, `priceANC${filename}.xls`);
+    writeArrayToXLSX(csvData, `priceANC${filename}.xlsx`);
     await new Promise(resolve => setTimeout(resolve, 300000));
     dataArray = []
   } catch (error) {
@@ -115,7 +128,7 @@ async function run() {
 
 
   try {
-    await runZnahar();
+    //await runZnahar();
     let csvDataZnahar = [[
       'id',
       'drug_id',
@@ -150,7 +163,7 @@ async function run() {
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     console.log(`Довжина знахар:${csvDataZnahar.length}`);
-    writeArrayToXLS(csvDataZnahar, `priceZnahar${filename}.xls`);
+    writeArrayToXLSX(csvDataZnahar, `priceZnahar${filename}.xls`);
     await new Promise(resolve => setTimeout(resolve, 300000));
     csvDataZnahar = [];
   } catch (error) {
@@ -160,46 +173,3 @@ async function run() {
 };
 
 run();
-
-
-
-/*
-const generateNumbers = async () => {
-  const ancNames = await findAllAncNames();
-  for (const city of ancDB) {
-    let numbers = [];
-    //for (const name of ancNames) {
-    for (let i = 6; i <= 30; i++) {  //52000
-      numbers.push(i);
-      if (numbers.length >= 11) {
-
-        console.log(numbers.join(","));
-        
-        const xml = await getXMLPrice(city.id, numbers.join(","));
-
-        xml.forEach((item) => {
-          if (item.price == 0) return;
-          createNewDrug({
-            drug_id: item.id,
-            drug_name: item.name,
-            drug_producer: item.producer.name,
-            pharmacy_name: 'ANC',
-            pharmacy_region: city.city,
-            price: item.price,
-            availability_status: 'Забронювати',   
-          })
-        });
-        numbers = [];
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-
-
-  }
-  
-  
-}
-
-generateNumbers();
-*/
-
