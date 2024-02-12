@@ -7,6 +7,8 @@ import { runZnahar } from './znaharData.js';
 import { logger } from './logger/index.js';
 
 const sharedFolderPath = '../price/SynologyDrive/';
+let oldANC;
+let oldZnah;
 
 const main = async () => {
   const models = {
@@ -117,9 +119,15 @@ async function run() {
         el.updatedAt
       ])
     }
+
+    if(oldANC) fs.unlink(sharedFolderPath + oldANC);
+
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     writeArrayToXLSX(csvData, `priceANC${filename}.xlsx`);
+
+    oldANC = `priceANC${filename}.xlsx`;
+
     await new Promise(resolve => setTimeout(resolve, 300000));
     dataArray = []
   } catch (error) {
@@ -160,10 +168,16 @@ async function run() {
         el.updatedAt
       ])
     }
+
+    if(oldZnah) fs.unlink(sharedFolderPath + oldZnah);
+
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     console.log(`Довжина знахар:${csvDataZnahar.length}`);
-    writeArrayToXLSX(csvDataZnahar, `priceZnahar${filename}.xls`);
+    writeArrayToXLSX(csvDataZnahar, `priceZnahar${filename}.xlsx`);
+
+    oldZnah = `priceZnahar${filename}.xlsx`;
+
     await new Promise(resolve => setTimeout(resolve, 300000));
     csvDataZnahar = [];
   } catch (error) {
