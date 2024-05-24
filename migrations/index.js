@@ -13,6 +13,11 @@ const main = async () => {
             ANCnames.sync(),
             ZnaharPrices.sync()
         ]);
+
+        await sequelize.queryInterface.addColumn('ANCnames', 'link', {
+            type: sequelize.Sequelize.STRING,
+            allowNull: true,
+        });
         
         
         if (DEBUG && syncState) {
