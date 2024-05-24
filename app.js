@@ -55,7 +55,7 @@ const writeArrayToXLSX = (arrayData, xlsxFilePath) => {
 async function run() {
   
   try {
-    //await runANC();
+    await runANC();
     let csvData = [[
       'id',
       'drug_id',
@@ -102,7 +102,7 @@ async function run() {
 
 
   try {
-    //await runZnahar();
+    await runZnahar();
     let csvDataZnahar = [[
       'id',
       'drug_id',
@@ -144,7 +144,7 @@ async function run() {
 
     oldZnah = `priceZnahar${filename}.xlsx`;
 
-    await new Promise(resolve => setTimeout(resolve, 300000));
+    //await new Promise(resolve => setTimeout(resolve, 300000));
     csvDataZnahar = [];
   } catch (error) {
     console.error('Помилка Znahar: ', error);
