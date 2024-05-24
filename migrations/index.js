@@ -2,6 +2,7 @@ import { Drugs, createNewDrug } from '../models/drugs.js';
 import { ZnaharNames, createNewZnahar } from '../models/ZnaharNames.js';
 import {createNewAncName, findAllAncNames, ANCnames} from '../models/ancNomenclatura.js';
 import { ZnaharPrices } from '../models/priceZnahar.js';
+import { sequelize } from '../models/sequelize.js';
 
 const DEBUG = true;
 
