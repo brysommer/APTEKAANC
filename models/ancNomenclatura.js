@@ -13,6 +13,11 @@ ANCnames.init({
         type: DataTypes.STRING,
         allowNull: false,
         unique: false
+    },
+    link: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: false
     }
 }, {
     freezeTableName: false,
@@ -38,8 +43,17 @@ const findAllAncNames = async () => {
     return;
 };
 
+const updatelinkByDrug_id = async (drug_id, link) => {
+    const res = await Drugs.update({ link } , { where: { drug_id } });
+    if (res[0]) {
+        return res[0];
+    } 
+    return undefined;
+};
+
 export {
     ANCnames,
     createNewAncName,
     findAllAncNames,
+    updatelinkByDrug_id
 };   

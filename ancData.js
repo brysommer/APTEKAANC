@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {  createNewDrug, updateDrugById,
   findAncPriceByDrugPharmacy } from './models/drugs.js';
-import { findAllAncNames } from './models/ancNomenclatura.js';
+import { findAllAncNames, updatelinkByDrug_id } from './models/ancNomenclatura.js';
 import { logger } from './logger/index.js';
 
 const ancDB = [
@@ -9,6 +9,7 @@ const ancDB = [
     id: 28,
     city: 'Львів'
   },
+  /*
   {
     id: 114,
     city: 'Івано-Франківськ'
@@ -53,6 +54,7 @@ const ancDB = [
     id: 99,
     city: 'Ужгород'
   },
+  */
 ]
 
 
@@ -90,7 +92,11 @@ export const runANC = async () => {
             if (item.price == 0) return;
             const ancDrug = await findAncPriceByDrugPharmacy(item.id, city.city);
             if (ancDrug) {
-              await updateDrugById(ancDrug.id, item.price)
+
+              await updateDrugById(ancDrug.id, item.price);
+              
+              await updatelinkByDrug_id(item.id, item.link)
+
             } else {
               await createNewDrug({
                 drug_id: item.id,
