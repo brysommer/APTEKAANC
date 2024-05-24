@@ -39,40 +39,6 @@ const main = async () => {
 
 main();
 
-
-
-/*
-const writeArrayToXLS = (arrayData, xlsFilePath) => {
-  try {
-    const maxRowsPerSheet = 50000;
-    const sheets = [];
-    let count = 1;
-    
-    for(let i = 0; i < arrayData.length; i += maxRowsPerSheet) {
-      const chunk = arrayData.slice(i, i + maxRowsPerSheet);
-      const sheetName = `PART_${count++}`; 
-      
-      const worksheet = XLSX.utils.aoa_to_sheet(chunk);
-      sheets.push({name: sheetName, worksheet});
-    }
-    
-    const workbook = XLSX.utils.book_new();
-    
-    sheets.forEach(sheet => {
-      XLSX.utils.book_append_sheet(workbook, sheet.worksheet, sheet.name); 
-    });
-    
-    XLSX.writeFile(workbook, sharedFolderPath + xlsFilePath);
-    console.log(sheets.length, arrayData.length, xlsFilePath)
-    
-    logger.info(`Записано ${sheets.length} частин, ${arrayData.length} элементів в ${xlsFilePath.slice(0, 9)}`);
-    console.log('Масив успішно записано в XLS.');
-  } catch (error) {
-    logger.warn(`Масив: ${arrayData.length} Шлях: ${xlsFilePath} Помилка під час запису масиву в XLS:`, error)
-    console.error('Помилка під час запису масиву в XLS:', error);
-  }
-}
-*/
 const writeArrayToXLSX = (arrayData, xlsxFilePath) => {
 
   const worksheet = XLSX.utils.aoa_to_sheet(arrayData);

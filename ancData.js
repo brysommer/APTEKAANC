@@ -84,7 +84,6 @@ export const runANC = async () => {
       numbers.push(ancName.drug_id);
       if (numbers.length >= 11) {
 
-        //console.log(`City: ${city.id} Nambers: ${numbers.join(",")}`);
         try {
           const xml = await getXMLPrice(city.id, numbers.join(","));
 
@@ -94,7 +93,7 @@ export const runANC = async () => {
             if (ancDrug) {
 
               await updateDrugById(ancDrug.id, item.price);
-              
+
               await updatelinkByDrug_id(item.id, item.link)
 
             } else {
