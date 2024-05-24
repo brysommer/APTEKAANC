@@ -44,7 +44,7 @@ const findAllAncNames = async () => {
 };
 
 const updatelinkByDrug_id = async (drug_id, link) => {
-    const res = await Drugs.update({ link } , { where: { drug_id } });
+    const res = await ANCnames.update({ link } , { where: { drug_id } });
     if (res[0]) {
         return res[0];
     } 
