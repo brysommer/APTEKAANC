@@ -58,8 +58,8 @@ const createNewDrug = async (drugData) => {
 };
 
 
-const updateDrugById = async (id, price) => {
-    const res = await Drugs.update({ price } , { where: { id } });
+const updateDrugById = async (drug_id, price, availability_status) => {
+    const res = await Drugs.update({ price, availability_status } , { where: { drug_id } });
     if (res[0]) {
         return res[0];
     } 
@@ -74,7 +74,7 @@ const findAncPriceByDrugPharmacy = async (drug_id, pharmacy_region) => {
 
 
 const findALLDrugs = async () => {
-    const res = await Drugs.findAll({ where: {  } });
+    const res = await Drugs.findAll({ where: { pharmacy_region: 'Львів' } });
     if (res.length > 0) return res.map(el => el.dataValues);
     return;
 };

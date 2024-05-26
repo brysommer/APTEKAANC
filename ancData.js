@@ -5,6 +5,7 @@ import { findAllAncNames, updatelinkByDrug_id } from './models/ancNomenclatura.j
 import { logger } from './logger/index.js';
 
 const ancDB = [
+  
   {
     id: 28,
     city: 'Львів'
@@ -69,54 +70,50 @@ const getXMLPrice = async(city, products) => {
   }
 }
 
+const getPriceStock = async(link) => {
+  try {
+    const response = await axios.get(`https://anc.ua/productbrowser/v2/ua/products/${link}/pharmacies?city=28&district`);
+    return response.data;
+  } catch (error) {
+    console.error('Помилка при отриманні XML: ', error);
+    throw error;
+  }
+}
+
 export const runANC = async () => {
   const ancNames = await findAllAncNames();
 
-  for (const city of ancDB) {
-    logger.info(`Parser started to work on ${city.city}`)
-    let numbers = [];
 
     for (let i = 0; i < ancNames.length; i++) {
       const ancName = ancNames[i];  
       if (i % 1000 === 0) {
         logger.info(`ANC обробляє елемент ${i}`); 
       }
-      numbers.push(ancName.drug_id);
-      if (numbers.length >= 11) {
 
         try {
-          const xml = await getXMLPrice(city.id, numbers.join(","));
+          if (!ancName.price) return;
+          
+          const drugData = await getPriceStock(ancName.link);
 
-          xml.forEach(async (item) => {
-            if (item.price == 0) return;
-            const ancDrug = await findAncPriceByDrugPharmacy(item.id, city.city);
-            if (ancDrug) {
+          if (drugData.price == 0) return;
 
-              await updateDrugById(ancDrug.id, item.price);
+          const ancDrug = await findAncPriceByDrugPharmacy(drugData.id, 'Львів');
 
-              await updatelinkByDrug_id(item.id, item.link)
+          const stock = ancDrug.count == 0 ? 'outOfStock' : ancDrug.count;
 
-            } else {
-              await createNewDrug({
-                drug_id: item.id,
-                drug_name: item.name,
-                drug_producer: item.producer.name,
-                pharmacy_name: 'ANC',
-                pharmacy_region: city.city,
-                price: item.price,
-                availability_status: 'Забронювати',   
-              })
-            }
-          });
+          if (ancDrug) {
+
+              await updateDrugById(ancDrug.id, item.price, stock);
+              //await updatelinkByDrug_id(item.id, item?.link);
+              //написати утиліту
+          } 
   
         } catch (error) {
           logger.error(`ANC parder error: ${error}`)
         }
-        numbers = [];
         await new Promise(resolve => setTimeout(resolve, 500));
-      }
     }
-  }
+  
 }
 
 

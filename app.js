@@ -5,6 +5,7 @@ import { runANC } from './ancData.js';
 import { findALLZnaharPrices } from './models/priceZnahar.js';
 import { runZnahar } from './znaharData.js';
 import { logger } from './logger/index.js';
+import fs from 'fs';
 
 const sharedFolderPath = '../price/SynologyDrive/';
 let oldANC;
