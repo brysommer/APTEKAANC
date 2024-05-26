@@ -85,28 +85,25 @@ export const runANC = async () => {
 
 
     for (let i = 0; i < ancNames.length; i++) {
+
       const ancName = ancNames[i];  
       if (i % 1000 === 0) {
         logger.info(`ANC обробляє елемент ${i}`); 
       }
 
         try {
-          if (!ancName.price) return;
           
           const drugData = await getPriceStock(ancName.link);
 
-          if (drugData.price == 0) return;
 
-          const ancDrug = await findAncPriceByDrugPharmacy(drugData.id, 'Львів');
 
-          const stock = ancDrug.count == 0 ? 'outOfStock' : ancDrug.count;
+          const stock = drugData.count == 0 ? 'outOfStock' : drugData.count;
+          console.log(ancName.drug_id, drugData.price, stock)
 
-          if (ancDrug) {
-
-              await updateDrugById(ancDrug.id, item.price, stock);
+      const update = await updateDrugById(drugData.id, drugData.price, stock);
+      console.log(update)
               //await updatelinkByDrug_id(item.id, item?.link);
               //написати утиліту
-          } 
   
         } catch (error) {
           logger.error(`ANC parder error: ${error}`)
