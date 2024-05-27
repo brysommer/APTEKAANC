@@ -92,10 +92,10 @@ export const runANC = async () => {
       }
 
         try {
-          
+          if (!ancName.link) continue;
           const drugData = await getPriceStock(ancName.link);
 
-
+          if(drugData.price) continue;
 
           const stock = drugData.count == 0 ? 'outOfStock' : drugData.count;
           console.log(ancName.drug_id, drugData.price, stock)

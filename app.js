@@ -91,7 +91,7 @@ async function run() {
 
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
-    writeArrayToXLSX(csvData, `priceANC${filename}.xlsx`);
+    writeArrayToXLSX(csvData, sharedFolderPath + `priceANC${filename}.xlsx`);
 
     oldANC = `priceANC${filename}.xlsx`;
 
@@ -141,7 +141,7 @@ async function run() {
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     console.log(`Довжина знахар:${csvDataZnahar.length}`);
-    writeArrayToXLSX(csvDataZnahar, `priceZnahar${filename}.xlsx`);
+    writeArrayToXLSX(csvDataZnahar, sharedFolderPath + `priceZnahar${filename}.xlsx`);
 
     oldZnah = `priceZnahar${filename}.xlsx`;
 
