@@ -86,7 +86,7 @@ async function run() {
         el.updatedAt
       ])
     }
-    
+
     if(oldANC) {
       try {
         await fs.unlink(sharedFolderPath + oldANC);
@@ -143,7 +143,6 @@ async function run() {
         el.updatedAt
       ])
     }
-    console.log('ZNAHAR' + oldZnah)
     if(oldZnah) {
       try {
         await fs.unlink(sharedFolderPath + oldZnah);

@@ -5,8 +5,9 @@ import { findAllAncNames, updatelinkByDrug_id } from './models/ancNomenclatura.j
 
 const updateLinks = async () => {
     const ancNames = await findAllAncNames();
+    console.log(ancNames[0].link)
     const nameNeedLink = ancNames.filter(name => name.link === undefined);
-
+    console.log(nameNeedLink.lenght)
     for (link of nameNeedLink) {
         const getXMLPrice = async(products) => {
             try {
