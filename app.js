@@ -5,7 +5,7 @@ import { runANC } from './ancData.js';
 import { findALLZnaharPrices } from './models/priceZnahar.js';
 import { runZnahar } from './znaharData.js';
 import { logger } from './logger/index.js';
-import fs from 'fs';
+import { promises as fs } from 'fs';
 
 const sharedFolderPath = '../price/SynologyDrive/';
 let oldANC;
@@ -86,8 +86,16 @@ async function run() {
         el.updatedAt
       ])
     }
-    console.log('oldANC' + oldANC)
-    if(oldANC) fs.unlink(sharedFolderPath + oldANC);
+    
+    if(oldANC) {
+      try {
+        await fs.unlink(sharedFolderPath + oldANC);
+        console.log('Файл успішно видалено');
+      } catch (err) {
+        console.error('Помилка при видаленні файлу:', err);
+      }  
+    }
+  
 
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
@@ -136,8 +144,14 @@ async function run() {
       ])
     }
     console.log('ZNAHAR' + oldZnah)
-    if(oldZnah) fs.unlink(sharedFolderPath + oldZnah);
-
+    if(oldZnah) {
+      try {
+        await fs.unlink(sharedFolderPath + oldZnah);
+        console.log('Файл успішно видалено');
+      } catch (err) {
+        console.error('Помилка при видаленні файлу:', err);
+      }
+    };
     const date = new Date();
     const filename = date.toISOString().replace(/T/g, "_").replace(/:/g, "-");
     console.log(`Довжина знахар:${csvDataZnahar.length}`);
