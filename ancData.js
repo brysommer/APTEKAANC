@@ -95,13 +95,13 @@ export const runANC = async () => {
           if (!ancName.link) continue;
           const drugData = await getPriceStock(ancName.link);
 
-          if(drugData.price) continue;
+          if(!drugData.price) continue;
 
           const stock = drugData.count == 0 ? 'outOfStock' : 'inStock';
           console.log(ancName.drug_id, drugData.price, stock)
 
-      const update = await updateDrugById(drugData.id, drugData.price, stock);
-      console.log(update)
+          const update = await updateDrugById(drugData.id, drugData.price, stock);
+          console.log(update)
               //await updatelinkByDrug_id(item.id, item?.link);
               //написати утиліту
   
