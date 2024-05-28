@@ -49,7 +49,7 @@ const writeArrayToXLSX = (arrayData, xlsxFilePath) => {
 
   XLSX.writeFile(workbook, xlsxFilePath);
 
-  logger.info(`Записано ${arrayData.length} элементів в ${xlsxFilePath}`);
+  logger.info(`Записано ${arrayData.length} элементів в файл`);
   
   console.log("Масив записано в XLSX");
 }
@@ -86,7 +86,7 @@ async function run() {
         el.updatedAt
       ])
     }
-
+    console.log('oldANC' + oldANC)
     if(oldANC) fs.unlink(sharedFolderPath + oldANC);
 
     const date = new Date();
@@ -95,7 +95,7 @@ async function run() {
 
     oldANC = `priceANC${filename}.xlsx`;
 
-    await new Promise(resolve => setTimeout(resolve, 300000));
+    await new Promise(resolve => setTimeout(resolve, 30000));
     dataArray = []
   } catch (error) {
     console.error('Помилка ANC: ', error);
@@ -135,7 +135,7 @@ async function run() {
         el.updatedAt
       ])
     }
-
+    console.log('ZNAHAR' + oldZnah)
     if(oldZnah) fs.unlink(sharedFolderPath + oldZnah);
 
     const date = new Date();
