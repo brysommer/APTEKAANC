@@ -97,7 +97,7 @@ export const runANC = async () => {
 
           if(drugData.price) continue;
 
-          const stock = drugData.count == 0 ? 'outOfStock' : drugData.count;
+          const stock = drugData.count == 0 ? 'outOfStock' : 'inStock';
           console.log(ancName.drug_id, drugData.price, stock)
 
       const update = await updateDrugById(drugData.id, drugData.price, stock);
