@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { findAllAncNames, updatelinkByDrug_id } from './models/ancNomenclatura.js';
+import { findAllAncNames, updatelinkByDrug_id } from '../models/ancNomenclatura.js';
 
 
 
